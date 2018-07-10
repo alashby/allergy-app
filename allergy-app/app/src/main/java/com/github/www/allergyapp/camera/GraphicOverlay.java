@@ -21,6 +21,7 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -187,6 +188,16 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
                 }
             }
             return null;
+        }
+    }
+
+    public ArrayList<T> getGraphics() {
+        ArrayList<T> graphiclist = new ArrayList<>();
+        synchronized (lock) {
+            for (T graphic : graphics) {
+                graphiclist.add(graphic);
+            }
+            return graphiclist;
         }
     }
 

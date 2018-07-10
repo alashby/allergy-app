@@ -42,7 +42,9 @@ import java.util.List;
 
 public final class OCRActivity extends AppCompatActivity {
 
-    private String[] words;
+    private ArrayList<String> allergenNames;
+    private ArrayList<Integer> allergenLvls;
+
 
     // Intent request code to handle updating play services if needed.
     private static final int RC_HANDLE_GMS = 9001;
@@ -70,6 +72,10 @@ public final class OCRActivity extends AppCompatActivity {
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         setContentView(R.layout.activity_ocr);
+
+        Bundle prevBundle = getIntent().getExtras();
+        allergenNames = prevBundle.getStringArrayList("NAMES");
+        allergenLvls = prevBundle.getIntegerArrayList("LEVELS");
 
         preview = (CameraSourcePreview) findViewById(R.id.preview);
         graphicOverlay = (GraphicOverlay<OCRGraphic>) findViewById(R.id.graphicOverlay);
@@ -280,11 +286,13 @@ public final class OCRActivity extends AppCompatActivity {
     /**
      * onTap is called evaluate the tapped TextBlock, if any.
      *
-     * @param rawX - the raw position of the tap
-     * @param rawY - the raw position of the tap.
-     * @return true if the tap was on a TextBlock
+     *  rawX - the raw position of the tap
+     *  rawY - the raw position of the tap.
+     *  true if the tap was on a TextBlock
      */
+    /*
     private boolean onTap(float rawX, float rawY) {
+
         OCRGraphic graphic = graphicOverlay.getGraphicAtLocation(rawX,rawY);
         TextBlock text = null;
         if (graphic != null) {
@@ -298,13 +306,42 @@ public final class OCRActivity extends AppCompatActivity {
             }
         }
         return false;
+    }*/
+
+    /**
+     * onTap is called to evaluate the highlighted TextBoxes on screen
+     * @return true if there are any TextBoxes highlighted
+     */
+
+    private boolean onTap() {
+        ArrayList<OCRGraphic> graphics = graphicOverlay.getGraphics();
+        ArrayList<TextBlock> texts = new ArrayList<>();
+        ArrayList<String> strs = new ArrayList<>();
+        if (!graphics.isEmpty()) {
+            for (int i = 0; i < graphics.size(); i++) {
+                texts.add(graphics.get(i).getTextBlock());
+            }
+            for (int i = 0; i < texts.size(); i++) {
+                if (texts.get(i) != null && texts.get(i).getValue() != null) {
+                    strs.add(texts.get(i).getValue());
+                }
+            }
+            Bundle bundle = new Bundle();
+            bundle.putStringArrayList("INGREDIENTS", strs);
+            bundle.putStringArrayList("NAMES", allergenNames);
+            bundle.putIntegerArrayList("LEVELS", allergenLvls);
+            Intent ingredientsActivity = new Intent(this, IngredientsActivity.class);
+            ingredientsActivity.putExtras(bundle);
+            startActivity(ingredientsActivity);
+        }
+        return false;
     }
 
     private class CaptureGestureListener extends GestureDetector.SimpleOnGestureListener {
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-            return onTap(e.getRawX(), e.getRawY()) || super.onSingleTapConfirmed(e);
+            return onTap() || super.onSingleTapConfirmed(e);
         }
     }
 

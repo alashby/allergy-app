@@ -7,6 +7,8 @@ import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.text.Text;
 import com.google.android.gms.vision.text.TextBlock;
 
+import java.util.ArrayList;
+
 public class OCRProcessor implements Detector.Processor<TextBlock> {
 
     private GraphicOverlay<OCRGraphic> graphicOverlay;
@@ -19,11 +21,15 @@ public class OCRProcessor implements Detector.Processor<TextBlock> {
     @Override
     public void receiveDetections(Detector.Detections<TextBlock> detections) {
         graphicOverlay.clear();
-        SparseArray<TextBlock> items = detections.getDetectedItems();
-        for (int i = 0; i < items.size(); ++i) {
-            TextBlock item = items.valueAt(i);
+        SparseArray<TextBlock> detectedItems = detections.getDetectedItems();
+        for (int i = 0; i < detectedItems.size(); ++i) {
+            TextBlock item = detectedItems.valueAt(i);
             if (item != null && item.getValue() != null) {
-                if (item.getValue().toLowerCase().contains("ingredients")) {
+                if (item.getValue().toLowerCase().trim().contains("ingredients") ||
+                        item.getValue().toLowerCase().trim().contains("contain") ||
+                        item.getValue().toLowerCase().trim().contains("processes") ||
+                        item.getValue().toLowerCase().trim().contains("that uses") ||
+                        item.getValue().toLowerCase().trim().contains("which uses")) {
                     OCRGraphic graphic = new OCRGraphic(graphicOverlay, item);
                     graphicOverlay.add(graphic);
                 }

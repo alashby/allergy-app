@@ -21,7 +21,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".OCRActivity" />
-        <activity android:name=".IngredientsActivity"></activity>
+        <activity android:name=".IngredientsActivity" />
+        <activity android:name=".CreateAllergenActivity"></activity>
     </application>
 
 </manifest>
