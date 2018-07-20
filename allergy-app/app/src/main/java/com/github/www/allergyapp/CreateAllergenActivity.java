@@ -5,24 +5,58 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.Spinner;
+
 
 import java.io.File;
 import java.util.Scanner;
 
 public class CreateAllergenActivity extends AppCompatActivity {
 
+    String selectedAllergen = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_allergen);
 
+        EditText nameInput = (EditText) findViewById(R.id.nameInput);
+
         Button createBtn = (Button) findViewById(R.id.createButton);
         createBtn.setEnabled(false);
 
-        EditText nameInput = (EditText) findViewById(R.id.nameInput);
+        Spinner spinner = (Spinner) findViewById(R.id.allergenSpinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.allergens_array,android.R.layout.simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                if (parent.getSelectedItem().toString().equals("Other")) {
+                    nameInput.setVisibility(View.VISIBLE);
+                    createBtn.setEnabled(false);
+                }
+                else {
+                    nameInput.setText("");
+                    nameInput.setVisibility(View.INVISIBLE);
+                    selectedAllergen = parent.getSelectedItem().toString();
+                    createBtn.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                createBtn.setEnabled(false);
+            }
+        });
+
         nameInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -36,7 +70,7 @@ public class CreateAllergenActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (!nameInput.getText().toString().isEmpty()) {
+                if (!nameInput.getText().toString().isEmpty() || !spinner.getSelectedItem().toString().equals("Other")) {
                     createBtn.setEnabled(true);
                 }
                 else {
@@ -45,6 +79,7 @@ public class CreateAllergenActivity extends AppCompatActivity {
             }
         });
     }
+
 
     public void selectLevel(View view) {
         RadioButton benignBtn = (RadioButton) findViewById(R.id.benignButton);
@@ -80,8 +115,14 @@ public class CreateAllergenActivity extends AppCompatActivity {
         RadioButton benignBtn = (RadioButton) findViewById(R.id.benignButton);
         RadioButton moderateBtn = (RadioButton) findViewById(R.id.moderateButton);
         RadioButton severeBtn = (RadioButton) findViewById(R.id.severeButton);
+        Spinner spinner = (Spinner) findViewById(R.id.allergenSpinner);
 
-        allergenName = nameInput.getText().toString().trim();
+        if (spinner.getSelectedItem().toString().equals("Other")) {
+            allergenName = nameInput.getText().toString().trim();
+        }
+        else {
+            allergenName = selectedAllergen;
+        }
         if (benignBtn.isChecked()) {
             allergenLvl = 1;
         } else if (moderateBtn.isChecked()) {

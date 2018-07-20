@@ -13,6 +13,13 @@
         android:layout_alignParentTop="true"
         android:text="Allergen:" />
 
+    <Spinner
+        android:id="@+id/allergenSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/allergenName"
+        android:layout_alignParentTop="true"/>
+
     <EditText
         android:id="@+id/nameInput"
         android:layout_width="wrap_content"
@@ -20,7 +27,7 @@
         android:ems="10"
         android:inputType="textPersonName"
         android:text=""
-        android:layout_toEndOf="@id/allergenName"
+        android:layout_toEndOf="@id/allergenSpinner"
         android:layout_alignParentTop="true"/>
 
     <TextView
