@@ -22,6 +22,7 @@ import java.util.Arrays;
 public class MainActivity extends AppCompatActivity {
     public static Activity mainact;
     private ArrayList<Allergen> allergens;
+    AllergenMap allergyMap = new AllergenMap();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +31,24 @@ public class MainActivity extends AppCompatActivity {
 
         mainact = this;
 
+        // array list to hold user's previously selected allergies
         allergens = new ArrayList<Allergen>();
+        // array to populate map with with resource array list
+        String allergenarr[] = getResources().getStringArray(R.array.allergens_array);
+
+        //fill the map with the allergens
+        for(int i = 0; i < allergenarr.length; i++)
+        {
+            if (allergenarr[i].equals("Wheat")) {
+                allergyMap.addAllergen((Integer.toString(i+1)), new Allergen(allergenarr[i],
+                        0, allergyMap.returnAllergenKey("Gluten")));
+            }
+            else if (!allergenarr[i].equals("Other")) {
+                allergyMap.addAllergen(Integer.toString(i + 1),
+                        (new Allergen(allergenarr[i], 0)));
+            }
+        }
+
 
         try {
             InputStream inputStream = this.openFileInput("allergens.txt");
@@ -66,15 +84,34 @@ public class MainActivity extends AppCompatActivity {
         }
         else
         {
+            // TODO: Add comment about change to adding to map
+            int count = allergenarr.length + 1;
+            for (int i = 0; i < allergens.size(); i++) {
+                // If allergen not in the default list, add it
+                if (allergyMap.returnAllergenKey(allergens.get(i).get_name()).equals("Allergy Not Found")) {
+                    allergyMap.addAllergen(Integer.toString(count), allergens.get(i));
+                    count++;
+                }
+                // If not, adjust the severity level in the map
+                else
+                {
+                    allergyMap.setAllergyLevel(allergens.get(i).get_name(),
+                            allergens.get(i).get_level());
+                }
+            }
             noallergenstxt.setVisibility(View.INVISIBLE);
             startbtn.setEnabled(true);
         }
+
+        GlobalAllergens.selectedAllergies = allergens;
+        GlobalAllergens.allergenMap = allergyMap;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
+        // On resume, if the user came from the create allergen activity add the new allergen
         if (getIntent().hasExtra("NAME")) {
             Bundle bundle = getIntent().getExtras();
 
@@ -87,7 +124,21 @@ public class MainActivity extends AppCompatActivity {
             AllergenFragment allergenFragment =
                     (AllergenFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_allergens);
             Allergen allergen = new Allergen(allergenName, allergenLvl);
+            allergens.add(allergen);
             allergenFragment.addAllergen(allergen);
+
+            GlobalAllergens.selectedAllergies.add(allergen);
+            if (allergyMap.returnAllergenKey(allergen.get_name()).equals("Allergy Not Found")) {
+                allergyMap.addAllergen(Integer.toString(allergyMap.size()+1),
+                        allergen);
+            }
+            else
+            {
+                allergyMap.setAllergyLevel(allergen.get_name(),
+                        allergen.get_level());
+            }
+            GlobalAllergens.allergenMap = allergyMap;
+            GlobalAllergens.selectedAllergies = allergens;
         }
     }
 
@@ -95,8 +146,26 @@ public class MainActivity extends AppCompatActivity {
         return allergens;
     }
 
+    /**
+     *
+     * @param allergens Array list of allergens to set as the user's selected allergens.
+     *                  Set the global allergen list and adds to text file for caching previous entries.
+     */
     public void setAllergens(ArrayList<Allergen> allergens) {
         this.allergens = allergens;
+        GlobalAllergens.selectedAllergies = allergens;
+
+        // Update the map
+        for (int i = 0; i < allergens.size(); i++) {
+            if (allergyMap.returnAllergenKey(allergens.get(i).get_name()).equals("Allergy Not Found")) {
+                allergyMap.addAllergen(Integer.toString(allergyMap.size() + 1),
+                        allergens.get(i));
+            } else {
+                allergyMap.setAllergyLevel(allergens.get(i).get_name(),
+                        allergens.get(i).get_level());
+            }
+        }
+        GlobalAllergens.allergenMap = allergyMap;
 
         String outputStr = "";
         // TODO: escape characters for "," and etc
@@ -159,13 +228,31 @@ public class MainActivity extends AppCompatActivity {
             allergenLvls.add(allergens.get(i).get_level());
         }
 
+        // TODO: Remove commented
+        /*
         Bundle bundle = new Bundle();
         bundle.putStringArrayList("NAMES", allergenNames);
         bundle.putIntegerArrayList("LEVELS", allergenLvls);
+        */
 
         Intent ocrActivity = new Intent(this, OCRActivity.class);
-        ocrActivity.putExtras(bundle);
+        //ocrActivity.putExtras(bundle);
         startActivity(ocrActivity);
 
+    }
+
+    /**
+     *
+     * @param allergen - The allergen to see if the allergen is present within the activity's allergen
+     *                 ArrayList
+     * @return True if the allergen is already in the allergens ArrayList. False if otherwise.
+     */
+    public boolean inAllergens(Allergen allergen) {
+        for (int i = 0; i < allergens.size(); i++) {
+            if (allergens.get(i).get_name().equals(allergen.get_name())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

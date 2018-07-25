@@ -73,9 +73,10 @@ public final class OCRActivity extends AppCompatActivity {
         super.onCreate(bundle);
         setContentView(R.layout.activity_ocr);
 
-        Bundle prevBundle = getIntent().getExtras();
+        // TODO: Remove commented
+        /*(Bundle prevBundle = getIntent().getExtras();
         allergenNames = prevBundle.getStringArrayList("NAMES");
-        allergenLvls = prevBundle.getIntegerArrayList("LEVELS");
+        allergenLvls = prevBundle.getIntegerArrayList("LEVELS");*/
 
         preview = (CameraSourcePreview) findViewById(R.id.preview);
         graphicOverlay = (GraphicOverlay<OCRGraphic>) findViewById(R.id.graphicOverlay);
@@ -326,10 +327,14 @@ public final class OCRActivity extends AppCompatActivity {
                     strs.add(texts.get(i).getValue());
                 }
             }
+
             Bundle bundle = new Bundle();
             bundle.putStringArrayList("INGREDIENTS", strs);
+
+            // TODO: Remove commented
+            /*
             bundle.putStringArrayList("NAMES", allergenNames);
-            bundle.putIntegerArrayList("LEVELS", allergenLvls);
+            bundle.putIntegerArrayList("LEVELS", allergenLvls);*/
             Intent ingredientsActivity = new Intent(this, IngredientsActivity.class);
             ingredientsActivity.putExtras(bundle);
             startActivity(ingredientsActivity);

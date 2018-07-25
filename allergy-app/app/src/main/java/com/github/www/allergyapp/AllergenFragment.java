@@ -76,8 +76,10 @@ public class AllergenFragment extends Fragment {
 
     public void addAllergen(Allergen allergen) {
         allergens.add(allergen);
-        ((MainActivity)getActivity()).setAllergens(allergens);
-
+        // add the allergen to the main activity if necessary
+        if (!((MainActivity)getActivity()).inAllergens(allergen)){
+            ((MainActivity)getActivity()).setAllergens(allergens);
+        }
 
         AllergenArrayAdapter adapter = new AllergenArrayAdapter(allergens, getContext(), this);
 

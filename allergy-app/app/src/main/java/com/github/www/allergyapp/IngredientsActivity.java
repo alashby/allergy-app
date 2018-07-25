@@ -24,21 +24,36 @@ public class IngredientsActivity extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
         allergens = new ArrayList<Allergen>();
 
+        // TODO: Remove commented
         ArrayList<String> texts = bundle.getStringArrayList("INGREDIENTS");
-        for (int i = 0; i < bundle.getStringArrayList("NAMES").size(); i++) {
+        /*for (int i = 0; i < bundle.getStringArrayList("NAMES").size(); i++) {
             Allergen allergen = new Allergen(bundle.getStringArrayList("NAMES").get(i),
                     bundle.getIntegerArrayList("LEVELS").get(i));
             allergens.add(allergen);
         }
+        */
 
-       ArrayList<String> blocks = new ArrayList();
-       for (int i = 0; i < texts.size(); i++) {
-           blocks.addAll(splitBlocks(texts.get(i)));
-       }
+        /* For all allergens found in the global selected allergeies list, add them and their
+        children based on their map data to the allergens array list.
+         */
+        for (int i = 0; i < GlobalAllergens.selectedAllergies.size(); i++) {
+            allergens.add(GlobalAllergens.allergenMap.getAllergenByName(GlobalAllergens.selectedAllergies.get(i).get_name()));
+            ArrayList<Allergen> children = GlobalAllergens.allergenMap.getAllChildAllergies(allergens.get(i));
+            for (int k = 0; k < children.size(); k++) {
+                if (!children.get(0).get_name().equals("no child allergies")) {
+                    allergens.add(children.get(k));
+                }
+            }
+        }
 
-       for (int i = 0; i < blocks.size(); i++) {
-           assessWarning(blocks.get(i), allergens);
-       }
+        ArrayList<String> blocks = new ArrayList();
+        for (int i = 0; i < texts.size(); i++) {
+            blocks.addAll(splitBlocks(texts.get(i)));
+        }
+
+        for (int i = 0; i < blocks.size(); i++) {
+            assessWarning(blocks.get(i), allergens);
+        }
     }
 
 
